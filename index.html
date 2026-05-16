@@ -1,0 +1,417 @@
+<h2 class="sr-only">Алгоритмичен антикорупционен анализ на обществени поръчки</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1f3d;--gold:#c9a84c;--gold-light:#f0e4b8;--gold-dark:#8a5f1a;
+  --cream:#f5f0e8;--border:#d4c9a8;--white:#fff;
+  --red:#e24b4a;--red-light:#fcebeb;--amber:#ba7517;--amber-light:#faeeda;
+  --green:#3b6d11;--green-light:#eaf3de;--blue:#185fa5;--blue-light:#e6f1fb;
+  --purple:#534ab7;--purple-light:#eeedfe;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--cream);color:var(--navy);padding:0}
+
+.demo-header{background:var(--navy);padding:1.25rem 1.75rem;border-bottom:2px solid var(--gold)}
+.demo-header h1{font-size:17px;font-weight:500;color:#f5f0e8;letter-spacing:0.02em}
+.demo-header p{font-size:13px;color:rgba(245,240,232,0.6);margin-top:4px}
+
+.case-banner{background:var(--white);border-bottom:0.5px solid var(--border);padding:1rem 1.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem}
+.case-title{font-size:14px;font-weight:500;color:var(--navy)}
+.case-meta{display:flex;gap:0.75rem;flex-wrap:wrap}
+.badge{font-size:11px;padding:3px 10px;border-radius:4px;font-weight:500}
+.badge-gold{background:var(--gold-light);color:var(--gold-dark)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+.badge-red{background:var(--red-light);color:var(--red)}
+
+.steps-bar{display:flex;background:var(--white);border-bottom:0.5px solid var(--border);padding:0 1.75rem;overflow-x:auto}
+.step-tab{padding:0.75rem 1rem;font-size:12px;font-weight:500;color:var(--navy);opacity:0.4;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:0.03em;text-transform:uppercase}
+.step-tab.active{opacity:1;border-bottom-color:var(--gold);color:var(--gold-dark)}
+.step-tab.done{opacity:0.7;color:var(--green)}
+
+.content{padding:1.5rem 1.75rem}
+
+.section-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:0.75rem;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'';width:14px;height:2px;background:var(--gold);flex-shrink:0}
+
+.table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:500px}
+th{background:var(--navy);color:#f5f0e8;padding:8px 11px;text-align:left;font-weight:500;font-size:10px;letter-spacing:0.07em;text-transform:uppercase;white-space:nowrap}
+td{padding:7px 11px;border-bottom:0.5px solid var(--border);background:var(--white);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
+td.mono{font-family:monospace;font-size:11.5px}
+.row-flag-red td{background:#fff5f5!important}
+.row-flag-amber td{background:#fffbf0!important}
+.row-winner td{background:var(--green-light)!important}
+.tag{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:500;white-space:nowrap}
+.tag-red{background:var(--red-light);color:var(--red)}
+.tag-amber{background:var(--amber-light);color:var(--amber)}
+.tag-green{background:var(--green-light);color:var(--green)}
+.tag-blue{background:var(--blue-light);color:var(--blue)}
+.tag-gray{background:#f1efe8;color:#5f5e5a}
+
+.anomaly-grid{display:flex;flex-direction:column;gap:1rem}
+.anomaly-card{background:var(--white);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;opacity:0;transform:translateY(8px);transition:all .4s ease}
+.anomaly-card.visible{opacity:1;transform:translateY(0)}
+.anomaly-header{display:flex;align-items:center;gap:10px;padding:0.9rem 1.25rem;border-bottom:0.5px solid var(--border)}
+.anomaly-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.icon-red{background:var(--red-light)}
+.icon-amber{background:var(--amber-light)}
+.icon-purple{background:var(--purple-light)}
+.anomaly-num{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
+.anomaly-num.red{color:var(--red)}
+.anomaly-num.amber{color:var(--amber)}
+.anomaly-num.purple{color:var(--purple)}
+.anomaly-title{font-size:14px;font-weight:600;color:var(--navy);margin-top:1px}
+.anomaly-body{padding:1rem 1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.anomaly-body{grid-template-columns:1fr}}
+.anomaly-finding{font-size:13px;color:var(--navy);line-height:1.6}
+.anomaly-finding span{font-weight:600}
+.anomaly-practice{font-size:12px;color:var(--gold-dark);background:var(--gold-light);padding:0.6rem 0.9rem;border-radius:6px;line-height:1.55;border-left:3px solid var(--gold)}
+.practice-label{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:4px}
+
+.network{padding:1rem;background:var(--white);border:0.5px solid var(--border);border-radius:8px;margin-bottom:1.25rem}
+.network svg{width:100%;height:auto}
+
+.verdict{background:var(--navy);border-radius:10px;padding:1.5rem;margin-bottom:1.25rem}
+.verdict-title{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.verdict-title::before{content:'';width:16px;height:2px;background:var(--gold)}
+.risk-score{display:flex;align-items:baseline;gap:8px;margin-bottom:1rem}
+.risk-num{font-size:52px;font-weight:200;color:#fff;line-height:1}
+.risk-label{font-size:13px;color:rgba(255,255,255,0.5)}
+.risk-bar{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-bottom:1.25rem}
+.risk-fill{height:100%;background:linear-gradient(90deg,var(--gold),#e24b4a);border-radius:4px;transition:width 1s ease}
+.verdict-flags{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:1.25rem}
+.vflag{background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.12);border-radius:6px;padding:0.65rem 0.85rem}
+.vflag-label{font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+.vflag-val{font-size:13px;font-weight:500;color:#f5f0e8}
+.verdict-rec{font-size:13.5px;color:rgba(245,240,232,0.75);line-height:1.7;border-top:0.5px solid rgba(255,255,255,0.1);padding-top:1rem}
+.verdict-rec strong{color:var(--gold-light)}
+
+.btn-row{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem}
+.btn{padding:9px 18px;border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--white);color:var(--navy);transition:all .18s;letter-spacing:0.02em}
+.btn:hover{background:var(--navy);color:#f5f0e8;border-color:var(--navy)}
+.btn-primary{background:var(--navy);color:#f5f0e8;border-color:var(--navy)}
+.btn-primary:hover{background:var(--gold-dark);border-color:var(--gold-dark)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+
+.info-box{background:var(--blue-light);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:0.75rem 1rem;font-size:13px;color:var(--blue);line-height:1.6;margin-bottom:1.25rem}
+.hidden{display:none}
+</style>
+
+<div class="demo-header">
+  <h1>Демонстратор: Изкуствен интелект за антикорупционен анализ</h1>
+  <p>Симулация на автоматизиран анализ на обществена поръчка · Хипотетичен казус</p>
+</div>
+
+<div class="case-banner">
+  <div>
+    <div class="case-title">Рехабилитация на пътна инфраструктура — Лот 1 и Лот 2</div>
+    <div style="font-size:12px;color:#4a5a6a;margin-top:3px">Референтен номер: ОП-2024-0847 · Възложител: Община Средец · Краен срок: 15.11.2024, 18:00 ч.</div>
+  </div>
+  <div class="case-meta">
+    <span class="badge badge-gold">€2,220,000 обща стойност</span>
+    <span class="badge badge-blue">6 участника</span>
+    <span class="badge badge-red">7 аномалии</span>
+  </div>
+</div>
+
+<div class="steps-bar">
+  <div class="step-tab active" id="tab-1" onclick="goStep(1)">01 · Данни</div>
+  <div class="step-tab" id="tab-2" onclick="goStep(2)">02 · Документен анализ</div>
+  <div class="step-tab" id="tab-3" onclick="goStep(3)">03 · Статистически екрани</div>
+  <div class="step-tab" id="tab-4" onclick="goStep(4)">04 · Мрежов анализ</div>
+  <div class="step-tab" id="tab-5" onclick="goStep(5)">05 · Вердикт</div>
+</div>
+
+<div class="content">
+
+<!-- STEP 1 -->
+<div id="step-1">
+  <div class="info-box">Системата зарежда данните от Централизираната автоматизирана информационна система „Електронни обществени поръчки" (ЦАИС ЕОП). Регистърът съдържа пълна информация за участниците и подадените оферти.</div>
+
+  <div class="section-label">Регистрирани участници</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Наименование</th><th>ЕИК</th><th>Седалище</th>
+          <th>Рег. капитал (€)</th><th>Банкова гаранция №</th><th>Банка / клон</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Пътстрой АД</td><td class="mono">831456789</td><td>София</td><td class="num">850,000</td><td class="mono">BG-2024-4471</td><td>УниКредит / клон Изток</td></tr>
+        <tr><td>2</td><td>Инфраструктура Груп ЕООД</td><td class="mono">204187632</td><td>Пловдив</td><td class="num">120,000</td><td class="mono">BG-2024-5103</td><td>ДСК / централа</td></tr>
+        <tr class="row-flag-amber"><td>3</td><td>Балкан Билд ООД</td><td class="mono">175923410</td><td>София</td><td class="num">95,000</td><td class="mono">BG-2024-4498</td><td>УниКредит / клон Изток</td></tr>
+        <tr><td>4</td><td>Евро Констракт АД</td><td class="mono">202341567</td><td>Варна</td><td class="num">310,000</td><td class="mono">BG-2024-5221</td><td>Райфайзен / централа</td></tr>
+        <tr class="row-winner"><td>5</td><td>Виа Модерна ЕООД</td><td class="mono">207654321</td><td>Стара Загора</td><td class="num">180,000</td><td class="mono">BG-2024-5318</td><td>Обединена Българска Банка</td></tr>
+        <tr class="row-flag-red"><td>6</td><td>Трансбилд Партнърс</td><td class="mono">206789012</td><td>София</td><td class="num">75,000</td><td class="mono">BG-2024-4472</td><td>УниКредит / клон Изток</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-label">Оферти по лотове</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Участник</th>
+          <th>Лот 1 — оферта (€)</th><th>Дата · час на подаване</th>
+          <th>Лот 2 — оферта (€)</th><th>Дата · час на подаване</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-flag-amber">
+          <td>Пътстрой АД</td>
+          <td class="num">1,198,000</td><td class="mono">12.11.2024 · 14:23</td>
+          <td class="num">952,000</td><td class="mono">12.11.2024 · 14:31</td>
+          <td><span class="tag tag-blue">Подадена</span></td>
+        </tr>
+        <tr>
+          <td>Инфраструктура Груп ЕООД</td>
+          <td class="num">1,195,400</td><td class="mono">08.11.2024 · 10:14</td>
+          <td class="num">949,100</td><td class="mono">08.11.2024 · 10:14</td>
+          <td><span class="tag tag-blue">Подадена</span></td>
+        </tr>
+        <tr class="row-flag-red">
+          <td>Балкан Билд ООД</td>
+          <td class="num">1,201,000</td><td class="mono">12.11.2024 · 14:46</td>
+          <td class="num">—</td><td class="mono">15.11.2024 · 17:58</td>
+          <td><span class="tag tag-red">Оттеглена Лот 2</span></td>
+        </tr>
+        <tr>
+          <td>Евро Констракт АД</td>
+          <td class="num">—</td><td class="mono">—</td>
+          <td class="num">951,800</td><td class="mono">05.11.2024 · 09:42</td>
+          <td><span class="tag tag-blue">Само Лот 2</span></td>
+        </tr>
+        <tr class="row-winner">
+          <td>Виа Модерна ЕООД</td>
+          <td class="num">1,234,000</td><td class="mono">10.11.2024 · 16:05</td>
+          <td class="num">1,102,000</td><td class="mono">10.11.2024 · 16:05</td>
+          <td><span class="tag tag-green">Победител</span></td>
+        </tr>
+        <tr class="row-flag-amber">
+          <td>Трансбилд Партнърс</td>
+          <td class="num">1,189,000</td><td class="mono">12.11.2024 · 16:51</td>
+          <td class="num">944,500</td><td class="mono">12.11.2024 · 16:51</td>
+          <td><span class="tag tag-blue">Подадена</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goStep(2)">Стартирай анализ →</button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div id="step-2" class="hidden">
+  <div class="info-box">NLP алгоритмите сканират тръжната документация. Системата анализира метаданни, правописни модели, часове на подаване и банкови документи.</div>
+  <div class="anomaly-grid" id="grid-2"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="goStep(1)">← Назад</button>
+    <button class="btn btn-primary" id="btn-next-2" onclick="goStep(3)" disabled>Статистически екрани →</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div id="step-3" class="hidden">
+  <div class="info-box">Статистическите екрани анализират ценовите модели и разпределението на офертите между лотовете.</div>
+  <div class="anomaly-grid" id="grid-3"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="goStep(2)">← Назад</button>
+    <button class="btn btn-primary" id="btn-next-3" onclick="goStep(4)" disabled>Мрежов анализ →</button>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div id="step-4" class="hidden">
+  <div class="info-box">Мрежовият анализ кръстосва данни от търговски регистри, IP логове и финансови трансфери. Разкриват се скрити корпоративни връзки.</div>
+  <div class="network">
+    <svg viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" id="network-svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#c9a84c"/></marker>
+        <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#e24b4a"/></marker>
+        <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#534ab7"/></marker>
+      </defs>
+      <rect x="20" y="108" width="120" height="48" rx="6" fill="#0f1f3d"/>
+      <text x="80" y="126" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#f5f0e8" font-weight="500">Пътстрой АД</text>
+      <text x="80" y="142" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="rgba(245,240,232,0.5)">ЕИК 831456789</text>
+
+      <rect x="200" y="28" width="145" height="48" rx="6" fill="#0f1f3d"/>
+      <text x="272" y="46" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#f5f0e8" font-weight="500">Балкан Билд ООД</text>
+      <text x="272" y="62" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="rgba(245,240,232,0.5)">ЕИК 175923410</text>
+
+      <rect x="200" y="198" width="145" height="48" rx="6" fill="#0f1f3d"/>
+      <text x="272" y="216" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#f5f0e8" font-weight="500">Трансбилд Партнърс</text>
+      <text x="272" y="232" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="rgba(245,240,232,0.5)">ЕИК 206789012</text>
+
+      <rect x="400" y="108" width="145" height="48" rx="6" fill="#3b6d11"/>
+      <text x="472" y="126" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#eaf3de" font-weight="500">Виа Модерна ЕООД</text>
+      <text x="472" y="142" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="rgba(234,243,222,0.6)">Победител</text>
+
+      <g id="conn-5" style="opacity:0;transition:opacity 0.5s">
+        <line x1="140" y1="132" x2="200" y2="222" stroke="#e24b4a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+        <rect x="108" y="168" width="100" height="22" rx="4" fill="#fcebeb"/>
+        <text x="158" y="182" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#a32d2d">34% дялово участие</text>
+      </g>
+      <g id="conn-6" style="opacity:0;transition:opacity 0.5s">
+        <line x1="140" y1="124" x2="200" y2="52" stroke="#c9a84c" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+        <rect x="108" y="72" width="108" height="22" rx="4" fill="#f0e4b8"/>
+        <text x="162" y="86" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#8a5f1a">Бивш служител</text>
+      </g>
+      <g id="conn-7" style="opacity:0;transition:opacity 0.5s">
+        <line x1="140" y1="142" x2="200" y2="210" stroke="#534ab7" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+        <rect x="68" y="192" width="130" height="22" rx="4" fill="#eeedfe"/>
+        <text x="133" y="206" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#534ab7">Обща IP подмрежа</text>
+      </g>
+    </svg>
+  </div>
+  <div class="anomaly-grid" id="grid-4"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="goStep(3)">← Назад</button>
+    <button class="btn btn-primary" id="btn-next-4" onclick="goStep(5)" disabled>Вердикт →</button>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div id="step-5" class="hidden">
+  <div class="verdict">
+    <div class="verdict-title">Автоматизиран вердикт на системата</div>
+    <div class="risk-score">
+      <span class="risk-num" id="risk-display">0</span>
+      <span class="risk-label">/ 100 · Индекс на корупционен риск</span>
+    </div>
+    <div class="risk-bar"><div class="risk-fill" id="risk-fill" style="width:0%"></div></div>
+    <div class="verdict-flags">
+      <div class="vflag"><div class="vflag-label">Открити аномалии</div><div class="vflag-val">7 от 7</div></div>
+      <div class="vflag"><div class="vflag-label">Засегнати участника</div><div class="vflag-val">4 от 6</div></div>
+      <div class="vflag"><div class="vflag-label">Тип нарушение</div><div class="vflag-val">Bid-rigging · Картел</div></div>
+      <div class="vflag"><div class="vflag-label">Засегнат бюджет</div><div class="vflag-val">€2,220,000</div></div>
+    </div>
+    <div class="verdict-rec">
+      Системата идентифицира <strong>силни индикатори за организирано манипулиране на търга</strong> с участието на минимум четири от шестте участници — потенциално нарушение на <strong>чл. 15 от ЗЗК</strong> (забранени споразумения и съгласувани практики) и § 1, т. 5 от ДР на ЗЗК (картел при процедура за възлагане на обществена поръчка). Препоръчва се <strong>незабавно спиране на процедурата</strong> и сезиране на <strong>Комисията за защита на конкуренцията (КЗК)</strong> за образуване на производство, както и уведомяване на прокуратурата за евентуална наказателна отговорност. Идентифицираните аномалии представляват <strong>индикатори за насочване на проверка на място</strong> — метаданни (автор „p.georgiev"), последователни банкови гаранции от един клон (BG-2024-4471 / BG-2024-4472), корпоративна структура на Трансбилд Партнърс и IP логове — и подлежат на верификация от компетентните органи.
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="goStep(4)">← Назад</button>
+    <button class="btn btn-primary" onclick="resetDemo()">↺ Нов анализ</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const anomalies = {
+  2:[
+    {num:'АНОМАЛИЯ 01',type:'red',icon:'📄',title:'Идентични правописни грешки',
+     finding:'Офертите на <span>Пътстрой АД</span> и <span>Балкан Билд ООД</span> съдържат идентични правописни и изчислителни грешки на 7 места — включително нетипично изписване на „асфалтобетон" и еднаква грешна формула в количествените сметки.',
+     practice:'<div class="practice-label">Разкрита практика</div>Класически индикатор за bid-rigging — офертите са изготвени от едно и също лице, представено от две различни фирми с цел симулиране на конкуренция.'},
+    {num:'АНОМАЛИЯ 02',type:'red',icon:'🗂️',title:'Метаданни: един автор, три оферти, 2 ч. 28 мин.',
+     finding:'PDF метаданните разкриват, че офертите на <span>Пътстрой АД</span> (14:23), <span>Балкан Билд ООД</span> (14:46) и <span>Трансбилд Партнърс</span> (16:51) са създадени от потребител <span>„p.georgiev"</span> на 12.11.2024 в рамките на 2 часа и 28 минути.',
+     practice:'<div class="practice-label">Разкрита практика</div>Три конкурентни оферти с общ реален автор — координация на ниво изготвяне на документацията, прикрита зад три отделни юридически лица.'},
+    {num:'АНОМАЛИЯ 03',type:'amber',icon:'🏦',title:'Последователни банкови гаранции от един клон',
+     finding:'<span>Пътстрой АД</span> и <span>Трансбилд Партнърс</span> са внесли банкови гаранции с номера <span>BG-2024-4471</span> и <span>BG-2024-4472</span> — последователни, издадени от <span>УниКредит, клон Изток</span> на една и съща дата.',
+     practice:'<div class="practice-label">Разкрита практика</div>Последователните номера сочат едновременно издаване в един клон — физически индикатор за координация между двете дружества преди подаване на офертите.'}
+  ],
+  3:[
+    {num:'АНОМАЛИЯ 04',type:'amber',icon:'📊',title:'Покриващо наддаване (cover bidding)',
+     finding:'<span>Инфраструктура Груп ЕООД</span> подава оферта за Лот 1 от €1,195,400 — точно <span>0.22% под</span> офертата на Пътстрой АД (€1,198,000). Моделът се повтаря в Лот 2: разлика от точно €2,900 (0.30%). Вероятността за случайност: под 0.3%.',
+     practice:'<div class="practice-label">Разкрита практика</div>Cover bidding — фирмата подава умишлено загубеща оферта, за да легитимира победата на картелния партньор, симулирайки реална конкуренция.'},
+    {num:'АНОМАЛИЯ 05',type:'amber',icon:'🔄',title:'Координирано оттегляне по лотове',
+     finding:'<span>Балкан Билд ООД</span> се оттегля от Лот 2 в <span>15.11.2024 в 17:58 ч.</span> — 2 минути преди крайния срок. Точно в Лот 2 се появява <span>Евро Констракт АД</span>, което не участва в Лот 1. Двете фирми никога не се конкурират директно.',
+     practice:'<div class="practice-label">Разкрита практика</div>Пазарно разпределение — участниците в картела са разделили лотовете помежду си. Оттеглянето в последната минута е умишлено, за да не провокира преразглеждане на процедурата.'}
+  ],
+  4:[
+    {num:'АНОМАЛИЯ 06',type:'red',icon:'🏢',title:'Скрита корпоративна свързаност и капиталови преливания',
+     finding:'<span>Трансбилд Партнърс</span> е дъщерно дружество на холдинг, в който <span>Пътстрой АД</span> притежава <span>34% дялово участие</span> — под прага за задължително деклариране. За последните 18 месеца между двете са извършени трансфери за <span>€340,000</span> без ясно търговско основание.',
+     practice:'<div class="practice-label">Разкрита практика</div>Корпоративна структура, проектирана да заобиколи праговете за деклариране на свързаност — класически инструмент за прикриване на конфликт на интереси при обществени поръчки.'},
+    {num:'АНОМАЛИЯ 07',type:'amber',icon:'👤',title:'Управителят е бивш служител',
+     finding:'Управителят на <span>Трансбилд Партнърс</span> е работил като <span>ръководител на отдел „Търгове"</span> в Пътстрой АД в периода 2019–2022 г. Той притежава пълен достъп до ценовите модели и тръжните стратегии на работодателя си.',
+     practice:'<div class="practice-label">Разкрита практика</div>„Revolving door" — бивш вътрешен служител използва знания от предишния работодател за координирано участие в търгове от позицията на формален конкурент.'},
+    {num:'АНОМАЛИЯ 08',type:'red',icon:'🌐',title:'Споделена IP подмрежа',
+     finding:'IP логовете на ЦАИС ЕОП показват, че офертите на <span>Пътстрой АД</span> и <span>Трансбилд Партнърс</span> са подадени от устройства в <span>идентична корпоративна подмрежа</span> (192.168.12.x) — физически невъзможно при независими участници.',
+     practice:'<div class="practice-label">Разкрита практика</div>Техническо доказателство за физическа свързаност — двете фирми са използвали обща ИТ инфраструктура при подаване на офертите, потвърждавайки координацията.'}
+  ]
+};
+
+let animTimers=[];
+function clearTimers(){animTimers.forEach(clearTimeout);animTimers=[];}
+
+function goStep(n){
+  clearTimers();
+  for(let i=1;i<=5;i++){
+    document.getElementById('step-'+i).classList.add('hidden');
+    const t=document.getElementById('tab-'+i);
+    t.classList.remove('active','done');
+    if(i<n)t.classList.add('done');
+  }
+  document.getElementById('step-'+n).classList.remove('hidden');
+  document.getElementById('tab-'+n).classList.add('active');
+  if(n===2)startAnomalies(2,'btn-next-2');
+  if(n===3)startAnomalies(3,'btn-next-3');
+  if(n===4)startNetwork();
+  if(n===5)startVerdict();
+}
+
+function startAnomalies(step,btnId){
+  const grid=document.getElementById('grid-'+step);
+  grid.innerHTML='';
+  anomalies[step].forEach((a,i)=>{
+    const card=document.createElement('div');
+    card.className='anomaly-card';
+    card.innerHTML=`<div class="anomaly-header"><div class="anomaly-icon icon-${a.type}">${a.icon}</div><div><div class="anomaly-num ${a.type}">${a.num}</div><div class="anomaly-title">${a.title}</div></div></div><div class="anomaly-body"><div class="anomaly-finding">${a.finding}</div><div class="anomaly-practice">${a.practice}</div></div>`;
+    grid.appendChild(card);
+    animTimers.push(setTimeout(()=>{
+      card.classList.add('visible');
+      if(i===anomalies[step].length-1)animTimers.push(setTimeout(()=>{document.getElementById(btnId).disabled=false;},400));
+    },i*600+300));
+  });
+}
+
+function startNetwork(){
+  const grid=document.getElementById('grid-4');
+  grid.innerHTML='';
+  ['conn-5','conn-6','conn-7'].forEach((id,i)=>{
+    animTimers.push(setTimeout(()=>{
+      const el=document.getElementById(id);
+      if(el)el.style.opacity='1';
+    },i*800+400));
+  });
+  anomalies[4].forEach((a,i)=>{
+    const card=document.createElement('div');
+    card.className='anomaly-card';
+    card.innerHTML=`<div class="anomaly-header"><div class="anomaly-icon icon-${a.type}">${a.icon}</div><div><div class="anomaly-num ${a.type}">${a.num}</div><div class="anomaly-title">${a.title}</div></div></div><div class="anomaly-body"><div class="anomaly-finding">${a.finding}</div><div class="anomaly-practice">${a.practice}</div></div>`;
+    grid.appendChild(card);
+    animTimers.push(setTimeout(()=>{
+      card.classList.add('visible');
+      if(i===anomalies[4].length-1)animTimers.push(setTimeout(()=>{document.getElementById('btn-next-4').disabled=false;},400));
+    },i*700+500));
+  });
+}
+
+function startVerdict(){
+  let score=0;
+  const fill=document.getElementById('risk-fill');
+  const display=document.getElementById('risk-display');
+  const iv=setInterval(()=>{
+    score+=2;
+    if(score>=94){score=94;clearInterval(iv);}
+    display.textContent=score;
+    fill.style.width=score+'%';
+  },30);
+}
+
+function resetDemo(){
+  clearTimers();
+  ['conn-5','conn-6','conn-7'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.transition='none';el.style.opacity='0';setTimeout(()=>{if(el)el.style.transition='opacity 0.5s';},50);}
+  });
+  document.getElementById('risk-display').textContent='0';
+  document.getElementById('risk-fill').style.width='0%';
+  goStep(1);
+}
+</script>

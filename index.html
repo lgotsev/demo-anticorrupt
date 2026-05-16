@@ -120,7 +120,7 @@ td.mono{font-family:monospace;font-size:11.5px}
   <div class="step-tab" id="tab-2" onclick="goStep(2)">02 · Документен анализ</div>
   <div class="step-tab" id="tab-3" onclick="goStep(3)">03 · Статистически екрани</div>
   <div class="step-tab" id="tab-4" onclick="goStep(4)">04 · Мрежов анализ</div>
-  <div class="step-tab" id="tab-5" onclick="goStep(5)">05 · Вердикт</div>
+  <div class="step-tab" id="tab-5" onclick="goStep(5)">05 · Оценка на риска</div>
 </div>
 
 <div class="content">
@@ -272,14 +272,14 @@ td.mono{font-family:monospace;font-size:11.5px}
   <div class="anomaly-grid" id="grid-4"></div>
   <div class="btn-row">
     <button class="btn" onclick="goStep(3)">← Назад</button>
-    <button class="btn btn-primary" id="btn-next-4" onclick="goStep(5)" disabled>Вердикт →</button>
+    <button class="btn btn-primary" id="btn-next-4" onclick="goStep(5)" disabled>Оценка на риска →</button>
   </div>
 </div>
 
 <!-- STEP 5 -->
 <div id="step-5" class="hidden">
   <div class="verdict">
-    <div class="verdict-title">Автоматизиран вердикт на системата</div>
+    <div class="verdict-title">Автоматизирана оценка на риска</div>
     <div class="risk-score">
       <span class="risk-num" id="risk-display">0</span>
       <span class="risk-label">/ 100 · Индекс на корупционен риск</span>
